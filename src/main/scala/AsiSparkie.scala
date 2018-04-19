@@ -128,7 +128,7 @@ object AsiSparkie extends App {
 
     // Chain all into a pipeline
     val dtPipeline = new Pipeline()
-      .setStages(Array( monthIndexer, dayOfMonthIndexer, dayOfMonthIndexer, uniqueCarrierIndexer, originIndexer, assembler, indexer, pca, bucketizer, dt ))
+      .setStages(Array( monthIndexer, dayOfMonthIndexer, dayOfWeek, uniqueCarrierIndexer, originIndexer, assembler, indexer, pca, bucketizer, dt ))
 
     // Train model
     val dtModel = dtPipeline.fit(trainingData)
