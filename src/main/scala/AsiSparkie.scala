@@ -1,6 +1,6 @@
 import me.deviantcode.sparkie.models.Flight
 import org.apache.spark.ml.{Pipeline, PipelineModel}
-import org.apache.spark.ml.classification.LogisticRegression
+import org.apache.spark.ml.classification.{DecisionTreeClassifier, LogisticRegression}
 import org.apache.spark.ml.feature._
 import org.apache.spark.sql.{DataFrame, Dataset, SparkSession}
 
@@ -8,7 +8,7 @@ object AsiSparkie extends App {
   val spark: SparkSession = SparkSession
     .builder()
     .master("local[4]") // only for demo and testing purposes, use spark-submit instead
-    .appName("Asi-Sparkie")
+    .appName("sparkie")
     .getOrCreate()
 
   import spark.implicits._
@@ -102,8 +102,42 @@ object AsiSparkie extends App {
     Use Decision Tree Classifier Pipeline
      */
 
-    //TODO
+    //index category index in raw feature
+    val indexer = new VectorIndexer()
+      .setInputCol("rawFeatures")
+      .setOutputCol("rawFeaturesIndexed")
+      .setMaxCategories(10)
 
+    //PCA dimension reduction transformer
+
+    val pca = new PCA()
+      .setInputCol("rawFeaturesIndexed")
+      .setOutputCol("features2")
+      .setK(10)
+
+    // label for multiclass classifier
+    val bucketizer = new Bucketizer()
+      .setInputCol("ArrDelay")
+      .setOutputCol("multiClassLabel")
+      .setSplits(Array(Double.NegativeInfinity, 0.0, 15.0, Double.PositiveInfinity))
+
+    // Train a Decision Tree model
+    val dt = new DecisionTreeClassifier()
+      .setLabelCol("multiClassLabel")
+      .setFeaturesCol("features2")
+
+    // Chain all into a pipeline
+    val dtPipeline = new Pipeline()
+      .setStages(Array( monthIndexer, dayOfMonthIndexer, dayOfMonthIndexer, uniqueCarrierIndexer, originIndexer, assembler, indexer, pca, bucketizer, dt ))
+
+    // Train model
+    val dtModel = dtPipeline.fit(trainingData)
+
+    // Make Predictions
+    val dtPredictions = dtModel.transform(testingData)
+
+    // Select example rows to display.
+    dtPredictions.select("prediction", "multiClassLabel", "features").show(20)
 
 
   } catch {
