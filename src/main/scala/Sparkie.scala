@@ -4,7 +4,7 @@ import org.apache.spark.ml.classification.{DecisionTreeClassifier, LogisticRegre
 import org.apache.spark.ml.feature._
 import org.apache.spark.sql.{DataFrame, Dataset, SparkSession}
 
-object AsiSparkie extends App {
+object Sparkie extends App {
   val spark: SparkSession = SparkSession
     .builder()
     .master("local[4]") // only for demo and testing purposes, use spark-submit instead
@@ -137,7 +137,7 @@ object AsiSparkie extends App {
     val dtPredictions = dtModel.transform(testingData)
 
     // Select example rows to display.
-    dtPredictions.select("prediction", "multiClassLabel", "features").show(20)
+    dtPredictions.select("prediction", "multiClassLabel", "features2").show(20)
 
 
   } catch {
