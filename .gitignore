@@ -10,4 +10,4 @@ project/target/
 .history
 .cache
 .lib/
-
+.idea/
